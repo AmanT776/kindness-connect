@@ -22,20 +22,31 @@ const Index = () => {
               Submit, track, and resolve complaints efficiently. Whether you choose to remain anonymous or identified, 
               your concerns will be heard and addressed professionally.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/submit">
-                  <FileText className="mr-2 h-5 w-5" />
-                  Submit a Complaint
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
-                <Link to="/track">
-                  <Search className="mr-2 h-5 w-5" />
-                  Track Your Complaint
-                </Link>
-              </Button>
-            </div>
+            {!isAuthenticated ? (
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button size="lg" asChild className="w-full sm:w-auto">
+                  <Link to="/submit">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Submit a Complaint
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
+                  <Link to="/track">
+                    <Search className="mr-2 h-5 w-5" />
+                    Track Your Complaint
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button size="lg" asChild className="w-full sm:w-auto">
+                  <Link to={user?.role === 'student' ? '/dashboard' : '/admin'}>
+                    <FileText className="mr-2 h-5 w-5" />
+                    Go to Dashboard
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -128,24 +139,26 @@ const Index = () => {
       )}
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24">
-        <div className="container">
-          <Card className="bg-primary text-primary-foreground">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h2 className="font-heading text-2xl font-bold md:text-3xl">
-                Have a concern? We're here to help.
-              </h2>
-              <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-                Our dedicated team reviews every complaint and works towards fair and timely resolutions.
-                Your feedback helps us improve our services.
-              </p>
-              <Button size="lg" variant="secondary" className="mt-8" asChild>
-                <Link to="/submit">Submit Your Complaint</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      {!isAuthenticated && (
+        <section className="py-16 md:py-24">
+          <div className="container">
+            <Card className="bg-primary text-primary-foreground">
+              <CardContent className="p-8 md:p-12 text-center">
+                <h2 className="font-heading text-2xl font-bold md:text-3xl">
+                  Have a concern? We're here to help.
+                </h2>
+                <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
+                  Our dedicated team reviews every complaint and works towards fair and timely resolutions.
+                  Your feedback helps us improve our services.
+                </p>
+                <Button size="lg" variant="secondary" className="mt-8" asChild>
+                  <Link to="/submit">Submit Your Complaint</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
     </Layout>
   );
 };

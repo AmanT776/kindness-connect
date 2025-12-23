@@ -22,7 +22,8 @@ export function Header() {
     navigate('/');
   };
 
-  const navLinks = [
+  // Only show these links for non-authenticated users
+  const navLinks = isAuthenticated ? [] : [
     { href: '/submit', label: 'Submit Anonymously' },
     { href: '/track', label: 'Track Complaint' },
   ];
