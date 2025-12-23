@@ -5,47 +5,81 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useComplaints } from '@/contexts/ComplaintsContext';
 import { StatusBadge } from '@/components/complaint/StatusBadge';
-import { CategoryBadge } from '@/components/complaint/CategoryBadge';
-import { Search, Calendar, Paperclip, MessageSquare, Clock } from 'lucide-react';
+import { Search, Calendar, Paperclip, Clock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Complaint, statusLabels } from '@/lib/mockData';
+import { getComplaintByReference, ComplaintData } from '@/services/compliant';
+import { useCategories } from '@/hooks/useCategories';
+import { useOrganizationalUnits } from '@/hooks/useOrganizationalUnits';
 
 const TrackComplaint = () => {
   const location = useLocation();
-  const { getComplaintByReference } = useComplaints();
+  const { categories } = useCategories();
+  const { units } = useOrganizationalUnits(1);
   
   const [referenceNumber, setReferenceNumber] = useState('');
-  const [complaint, setComplaint] = useState<Complaint | null>(null);
+  const [complaint, setComplaint] = useState<ComplaintData | null>(null);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Check if we came from submission with a reference number
     if (location.state?.referenceNumber) {
       setReferenceNumber(location.state.referenceNumber);
-      const found = getComplaintByReference(location.state.referenceNumber);
-      if (found) {
-        setComplaint(found);
-        setSearched(true);
-      }
+      handleFetchComplaint(location.state.referenceNumber);
     }
-  }, [location.state, getComplaintByReference]);
+  }, [location.state]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFetchComplaint = async (refNumber: string) => {
+    if (!refNumber.trim()) return;
+    
+    setIsLoading(true);
     setError('');
     setSearched(true);
     
-    const found = getComplaintByReference(referenceNumber.trim());
-    if (found) {
-      setComplaint(found);
-    } else {
+    try {
+      const response = await getComplaintByReference(refNumber.trim());
+      if (response.success && response.data) {
+        setComplaint(response.data);
+      } else {
+        setComplaint(null);
+        setError('No complaint found with this reference number. Please check and try again.');
+      }
+    } catch (error: any) {
+      console.error('Error fetching complaint:', error);
       setComplaint(null);
-      setError('No complaint found with this reference number. Please check and try again.');
+      const errorMessage = error?.response?.data?.message 
+        || error?.response?.data?.error 
+        || 'No complaint found with this reference number. Please check and try again.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleFetchComplaint(referenceNumber);
+  };
+
+  // Get category and unit names
+  const categoryName = categories.find(cat => cat.id === complaint?.categoryId)?.name || `Category ID: ${complaint?.categoryId}`;
+  const unitName = units.find(unit => unit.id === complaint?.organizationalUnitId)?.name || `Unit ID: ${complaint?.organizationalUnitId}`;
+  
+  // Map API status to display format
+  const getStatusDisplay = (status: string) => {
+    const statusMap: Record<string, { label: string; className: string }> = {
+      'PENDING': { label: 'Pending', className: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+      'RECEIVED': { label: 'Received', className: 'bg-blue-100 text-blue-800 border-blue-300' },
+      'UNDER_REVIEW': { label: 'Under Review', className: 'bg-purple-100 text-purple-800 border-purple-300' },
+      'RESOLVED': { label: 'Resolved', className: 'bg-green-100 text-green-800 border-green-300' },
+      'CLOSED': { label: 'Closed', className: 'bg-gray-100 text-gray-800 border-gray-300' },
+    };
+    return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+  };
+  
+  const statusDisplay = complaint ? getStatusDisplay(complaint.status) : null;
 
   return (
     <Layout>
@@ -72,9 +106,18 @@ const TrackComplaint = () => {
                     className="h-11"
                   />
                 </div>
-                <Button type="submit" size="lg">
-                  <Search className="mr-2 h-4 w-4" />
-                  Track
+                <Button type="submit" size="lg" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      Track
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -100,7 +143,11 @@ const TrackComplaint = () => {
                       <p className="text-sm text-muted-foreground">{complaint.referenceNumber}</p>
                       <CardTitle className="mt-1">{complaint.title}</CardTitle>
                     </div>
-                    <StatusBadge status={complaint.status} />
+                    {statusDisplay && (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusDisplay.className}`}>
+                        {statusDisplay.label}
+                      </span>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -111,18 +158,24 @@ const TrackComplaint = () => {
                   
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <CategoryBadge category={complaint.category} />
+                      <span className="px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
+                        {categoryName}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="px-2 py-1 rounded-md bg-muted text-xs">
+                        {unitName}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       Submitted: {format(new Date(complaint.createdAt), 'MMM d, yyyy')}
                     </div>
-                    {complaint.attachments.length > 0 && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Paperclip className="h-4 w-4" />
-                        {complaint.attachments.length} attachment(s)
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-xs">
+                        {complaint.isAnonymous ? 'Anonymous' : 'Not Anonymous'}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -132,60 +185,32 @@ const TrackComplaint = () => {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Clock className="h-5 w-5" />
-                    Status History
+                    Status Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative">
-                    {complaint.statusHistory.map((history, index) => (
-                      <div key={index} className="flex gap-4 pb-6 last:pb-0">
-                        <div className="relative flex flex-col items-center">
-                          <div className="h-3 w-3 rounded-full bg-primary" />
-                          {index < complaint.statusHistory.length - 1 && (
-                            <div className="absolute top-3 h-full w-0.5 bg-border" />
-                          )}
-                        </div>
-                        <div className="flex-1 -mt-0.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">{statusLabels[history.status]}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(history.date), 'MMM d, yyyy h:mm a')}
-                            </span>
-                          </div>
-                          {history.comment && (
-                            <p className="text-sm text-muted-foreground mt-1">{history.comment}</p>
-                          )}
-                        </div>
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <div className="relative flex flex-col items-center">
+                        <div className="h-3 w-3 rounded-full bg-primary" />
                       </div>
-                    ))}
+                      <div className="flex-1 -mt-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">Current Status: {complaint.status}</span>
+                          <span className="text-xs text-muted-foreground">
+                            Created: {format(new Date(complaint.createdAt), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        </div>
+                        {complaint.updatedAt !== complaint.createdAt && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Last Updated: {format(new Date(complaint.updatedAt), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Officer Comments */}
-              {complaint.officerComments.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Officer Updates
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {complaint.officerComments.map((comment, index) => (
-                      <div key={index} className="rounded-lg bg-muted/50 p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-sm">{comment.officerName}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(comment.date), 'MMM d, yyyy h:mm a')}
-                          </span>
-                        </div>
-                        <p className="text-sm">{comment.comment}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
             </div>
           )}
         </div>

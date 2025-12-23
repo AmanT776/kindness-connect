@@ -1,21 +1,23 @@
 import api from "./api";
 
+export interface ComplaintData {
+    id: number;
+    referenceNumber: string;
+    title: string;
+    description: string;
+    isAnonymous: boolean;
+    status: string;
+    organizationalUnitId: number;
+    categoryId: number;
+    userId: number | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface ComplaintResponse {
     success: boolean;
     message: string;
-    data: {
-        id: number;
-        referenceNumber: string;
-        title: string;
-        description: string;
-        isAnonymous: boolean;
-        status: string;
-        organizationalUnitId: number;
-        categoryId: number;
-        userId: number | null;
-        createdAt: string;
-        updatedAt: string;
-    };
+    data: ComplaintData;
 }
 
 export const createComplaint = async (data: FormData): Promise<ComplaintResponse> => {
@@ -37,6 +39,18 @@ export const createComplaint = async (data: FormData): Promise<ComplaintResponse
         console.error("Error response:", error?.response?.data);
         console.error("Error status:", error?.response?.status);
         console.error("Error message:", error?.message);
+        throw error;
+    }
+};
+
+export const getComplaintByReference = async (referenceNumber: string): Promise<ComplaintResponse> => {
+    try {
+        const res = await api.get(`/compliant/reference/${referenceNumber}`);
+        return res.data;
+    } catch (error: any) {
+        console.error("Error fetching complaint:", error);
+        console.error("Error response:", error?.response?.data);
+        console.error("Error status:", error?.response?.status);
         throw error;
     }
 };
