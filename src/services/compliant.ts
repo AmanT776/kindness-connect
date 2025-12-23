@@ -20,6 +20,12 @@ export interface ComplaintResponse {
     data: ComplaintData;
 }
 
+export interface ComplaintsListResponse {
+    success: boolean;
+    message: string;
+    data: ComplaintData[];
+}
+
 export const createComplaint = async (data: FormData): Promise<ComplaintResponse> => {
     // Log FormData contents for debugging
     console.log("FormData contents:");
@@ -49,6 +55,18 @@ export const getComplaintByReference = async (referenceNumber: string): Promise<
         return res.data;
     } catch (error: any) {
         console.error("Error fetching complaint:", error);
+        console.error("Error response:", error?.response?.data);
+        console.error("Error status:", error?.response?.status);
+        throw error;
+    }
+};
+
+export const getAllComplaints = async (): Promise<ComplaintsListResponse> => {
+    try {
+        const res = await api.get("/compliant/");
+        return res.data;
+    } catch (error: any) {
+        console.error("Error fetching complaints:", error);
         console.error("Error response:", error?.response?.data);
         console.error("Error status:", error?.response?.status);
         throw error;
