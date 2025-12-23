@@ -21,8 +21,8 @@ const App = () => (
     <AuthProvider>
       <ComplaintsProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
+          <Toaster/>
+          <Sonner  richColors position="top-right"/>
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />

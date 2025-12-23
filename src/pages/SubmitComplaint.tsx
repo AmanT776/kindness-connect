@@ -11,8 +11,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComplaints } from '@/contexts/ComplaintsContext';
 import { useToast } from '@/hooks/use-toast';
-import { departments, categoryLabels, ComplaintCategory } from '@/lib/mockData';
-import { Loader2, Upload, X, FileText, Image, File } from 'lucide-react';
+import { Loader2, Upload, X, FileText, Image, File, AlertCircle } from 'lucide-react';
+import { createComplaint } from '@/services/compliant';
+import { useCategories } from '@/hooks/useCategories';
+import { useOrganizationalUnits } from '@/hooks/useOrganizationalUnits';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Copy, CheckCircle2 } from 'lucide-react';
 
 const SubmitComplaint = () => {
   const { user, isAuthenticated } = useAuth();
@@ -20,21 +34,28 @@ const SubmitComplaint = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const { categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
+  const { units, isLoading: unitsLoading, error: unitsError } = useOrganizationalUnits(1); // parentId = 1
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ComplaintCategory | ''>('');
-  const [department, setDepartment] = useState('');
+  const [category, setCategory] = useState<number | null>(null);
+  const [department, setDepartment] = useState<number | null>(null);
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
-  const [attachments, setAttachments] = useState<{ name: string; url: string; type: string }[]>([]);
+  const [attachments, setAttachments] = useState<{ file: File; name: string; url: string; type: string }[]>([]);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState<string>('');
+  const [copied, setCopied] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       const newAttachments = Array.from(files).map(file => ({
+        file,
         name: file.name,
         url: URL.createObjectURL(file),
         type: file.type,
@@ -55,7 +76,6 @@ const SubmitComplaint = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!category) {
       toast({
         title: 'Category required',
@@ -76,37 +96,62 @@ const SubmitComplaint = () => {
 
     setIsLoading(true);
 
-    const referenceNumber = addComplaint({
-      title,
-      description,
-      category: category as ComplaintCategory,
-      department,
-      status: 'received',
-      isAnonymous,
-      submitterId: isAnonymous ? undefined : user?.id,
-      submitterName: isAnonymous ? undefined : user?.name,
-      submitterEmail: isAnonymous ? undefined : user?.email,
-      contactEmail: contactEmail || undefined,
-      contactPhone: contactPhone || undefined,
-      attachments,
-    });
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
 
-    setIsLoading(false);
+      formData.append('organizationalUnitId', department.toString());
 
-    toast({
-      title: 'Complaint submitted successfully!',
-      description: `Your reference number is: ${referenceNumber}`,
-    });
+      // Set isAnonymous to false as required
+      // Try both field names in case backend expects different spelling
+      formData.append('isAnonymous', 'true');
 
-    navigate('/track', { state: { referenceNumber } });
+      formData.append('categoryId', category.toString());
+
+      attachments.forEach((att) => {
+        formData.append('files', att.file);
+      });
+
+      const res = await createComplaint(formData);
+
+      // Extract reference number from response
+      if (res.success && res.data?.referenceNumber) {
+        setReferenceNumber(res.data.referenceNumber);
+        setShowSuccessDialog(true);
+      } else {
+        toast({
+          title: 'Complaint submitted successfully!',
+          description: 'Your complaint has been received.',
+        });
+        navigate('/track');
+      }
+    } catch (error: any) {
+      console.error('Error submitting complaint:', error);
+      console.error('Error response data:', error?.response?.data);
+      console.error('Error status:', error?.response?.status);
+      
+      const errorMessage = error?.response?.data?.message 
+        || error?.response?.data?.error 
+        || error?.message 
+        || 'There was a problem submitting your complaint. Please try again.';
+      
+      toast({
+        title: 'Submission failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-
+  console.log(title, description, category, department, isAnonymous, attachments);
   return (
     <Layout>
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 text-center">
-            <h1 className="font-heading text-3xl font-bold md:text-4xl">Submit a Complaint</h1>
+            <h1 className="font-heading text-3xl font-bold md:text-4xl">Submit a Complaint Anonymously</h1>
             <p className="mt-2 text-muted-foreground">
               Fill out the form below to submit your complaint. All fields marked with * are required.
             </p>
@@ -121,36 +166,51 @@ const SubmitComplaint = () => {
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-6">
-                {/* Anonymous Toggle */}
-                <div className="flex items-center space-x-3 rounded-lg border p-4 bg-muted/50">
-                  <Checkbox
-                    id="anonymous"
-                    checked={isAnonymous}
-                    onCheckedChange={(checked) => setIsAnonymous(checked === true)}
-                  />
-                  <div className="flex-1">
-                    <Label htmlFor="anonymous" className="text-base font-medium cursor-pointer">
-                      Submit anonymously
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Your identity will not be collected or stored with this complaint.
-                    </p>
-                  </div>
-                </div>
 
                 {/* Category */}
                 <div className="space-y-2">
                   <Label htmlFor="category">Category *</Label>
-                  <Select value={category} onValueChange={(val) => setCategory(val as ComplaintCategory)}>
+                  {categoriesError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        <div className="flex items-center justify-between">
+                          <span>
+                            Failed to load categories. {categoriesError instanceof Error ? categoriesError.message : 'Please try again.'}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
+                            className="ml-4"
+                          >
+                            Retry
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <Select
+                    value={category?.toString()}
+                    onValueChange={(val) => setCategory(parseInt(val))}
+                    disabled={categoriesLoading || categories.length === 0}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={categoriesLoading ? "Loading categories..." : categories.length === 0 ? "No categories available" : "Select a category"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {(Object.keys(categoryLabels) as ComplaintCategory[]).map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {categoryLabels[cat]}
+                      {categories.length === 0 && !categoriesLoading ? (
+                        <SelectItem value="no-categories" disabled>
+                          No categories available
                         </SelectItem>
-                      ))}
+                      ) : (
+                        categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id.toString()}>
+                            {cat.name}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -158,16 +218,47 @@ const SubmitComplaint = () => {
                 {/* Department */}
                 <div className="space-y-2">
                   <Label htmlFor="department">Department / Service Area *</Label>
-                  <Select value={department} onValueChange={setDepartment}>
+                  {unitsError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        <div className="flex items-center justify-between">
+                          <span>
+                            Failed to load departments. {unitsError instanceof Error ? unitsError.message : 'Please try again.'}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => queryClient.invalidateQueries({ queryKey: ['organizationalUnits'] })}
+                            className="ml-4"
+                          >
+                            Retry
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <Select
+                    value={department?.toString()}
+                    onValueChange={(val) => setDepartment(parseInt(val))}
+                    disabled={unitsLoading || units.length === 0}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={unitsLoading ? "Loading departments..." : units.length === 0 ? "No departments available" : "Select department"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {departments.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
+                      {units.length === 0 && !unitsLoading ? (
+                        <SelectItem value="no-departments" disabled>
+                          No departments available
                         </SelectItem>
-                      ))}
+                      ) : (
+                        units.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id.toString()}>
+                            {unit.name}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -200,7 +291,7 @@ const SubmitComplaint = () => {
                 {/* Attachments */}
                 <div className="space-y-2">
                   <Label>Attachments (Optional)</Label>
-                  <div 
+                  <div
                     className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -220,7 +311,7 @@ const SubmitComplaint = () => {
                       onChange={handleFileChange}
                     />
                   </div>
-                  
+
                   {attachments.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {attachments.map((file, index) => {
@@ -247,7 +338,7 @@ const SubmitComplaint = () => {
                   )}
                 </div>
 
-                {/* Contact Information (Optional) */}
+                {/* Contact Information (Optional)
                 <div className="space-y-4 rounded-lg border p-4">
                   <div>
                     <h3 className="font-medium">Contact for Updates (Optional)</h3>
@@ -277,7 +368,7 @@ const SubmitComplaint = () => {
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Submitter Info Display */}
                 {isAuthenticated && !isAnonymous && (
@@ -296,6 +387,60 @@ const SubmitComplaint = () => {
           </Card>
         </div>
       </div>
+
+      {/* Success Dialog with Reference Number */}
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-6 w-6 text-green-600" />
+              <AlertDialogTitle>Complaint Submitted Successfully!</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="pt-4">
+              <p className="mb-4">Your complaint has been received and is being processed.</p>
+              <div className="space-y-2">
+                <p className="font-semibold text-foreground">Your Reference Number:</p>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                  <code className="flex-1 font-mono text-sm font-semibold">{referenceNumber}</code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(referenceNumber);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                  >
+                    {copied ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 mr-1" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">
+                  <strong>Important:</strong> Please save this reference number. You will need it to track the status of your complaint in the future.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowSuccessDialog(false);
+              navigate('/track');
+            }}>
+              Track My Complaint
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

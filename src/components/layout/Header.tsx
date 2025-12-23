@@ -23,7 +23,7 @@ export function Header() {
   };
 
   const navLinks = [
-    { href: '/submit', label: 'Submit Complaint' },
+    { href: '/submit', label: 'Submit Anonymously' },
     { href: '/track', label: 'Track Complaint' },
   ];
 
