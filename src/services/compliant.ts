@@ -85,7 +85,7 @@ export interface UpdateStatusResponse {
 
 export const updateComplaintStatus = async (id: number, data: UpdateStatusRequest): Promise<UpdateStatusResponse> => {
     try {
-        // Ensure the data format is correct: { "status": "UNDER_REVIEW" }
+
         const requestData = {
             status: data.status
         };

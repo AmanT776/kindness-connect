@@ -11,15 +11,22 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background py-20 md:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-b from-blue-500 via-blue-400 to-blue-600 py-20 md:py-28">
         <div className="container">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              University Complaint
-              <span className="text-primary"> Management System</span>
+            <div className="mb-8 flex justify-center">
+              <img
+                src="/bduLogo.jpeg"
+                alt="Bahir Dar University Logo"
+                className="h-24 w-24 md:h-32 md:w-32 object-contain rounded-lg shadow-lg"
+              />
+            </div>
+            <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl text-white">
+              Bahir Dar University
+              <span className="text-yellow-300"> Complaint Management System</span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-              Submit, track, and resolve complaints efficiently. Whether you choose to remain anonymous or identified, 
+            <p className="mt-6 text-lg text-blue-100 md:text-xl">
+              Submit, track, and resolve complaints efficiently. Whether you choose to remain anonymous or identified,
               your concerns will be heard and addressed professionally.
             </p>
             {!isAuthenticated ? (
@@ -58,7 +65,7 @@ const Index = () => {
             <h2 className="font-heading text-3xl font-bold md:text-4xl">How It Works</h2>
             <p className="mt-3 text-muted-foreground">Simple, secure, and transparent complaint resolution</p>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card className="relative overflow-hidden">
               <CardHeader>
@@ -71,7 +78,7 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="relative overflow-hidden">
               <CardHeader>
                 <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
@@ -83,7 +90,7 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="relative overflow-hidden">
               <CardHeader>
                 <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
@@ -95,7 +102,7 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="relative overflow-hidden">
               <CardHeader>
                 <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">

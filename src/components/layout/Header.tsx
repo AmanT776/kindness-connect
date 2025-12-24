@@ -32,10 +32,24 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <img 
+            src="/bahirdar-university-logo.png" 
+            alt="Bahir Dar University Logo" 
+            className="h-10 w-auto object-contain"
+            onError={(e) => {
+              // Hide image and show fallback icon if logo not found
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const fallback = target.nextElementSibling as HTMLElement;
+              if (fallback) {
+                fallback.style.display = 'flex';
+              }
+            }}
+          />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary" style={{ display: 'none' }}>
             <FileText className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-heading text-xl font-semibold">ComplaintDesk</span>
+          <span className="font-heading text-xl font-semibold">Bahir Dar University</span>
         </Link>
 
         {/* Desktop Navigation */}

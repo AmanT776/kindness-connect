@@ -13,6 +13,7 @@ import SubmitComplaint from "./pages/SubmitComplaint";
 import TrackComplaint from "./pages/TrackComplaint";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,8 +23,8 @@ const App = () => (
     <AuthProvider>
       <ComplaintsProvider>
         <TooltipProvider>
-          <Toaster/>
-          <Sonner  richColors position="top-right"/>
+          <Toaster />
+          <Sonner richColors position="top-right" />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -44,6 +45,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/user"
+                element={
+                  <ProtectedRoute>
+                    <AdminUsers />
                   </ProtectedRoute>
                 }
               />

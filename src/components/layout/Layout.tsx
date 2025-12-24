@@ -14,8 +14,8 @@ export function Layout({ children }: LayoutProps) {
       </main>
       <footer className="border-t bg-card py-6">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} ComplaintDesk. All rights reserved.</p>
-          <p className="mt-1">University Complaint Management System</p>
+          <p>© {new Date().getFullYear()} Bahir Dar University. All rights reserved.</p>
+          <p className="mt-1">Complaint Management System</p>
         </div>
       </footer>
     </div>
