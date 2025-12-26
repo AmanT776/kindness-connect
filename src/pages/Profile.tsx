@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { updateUser, UserData } from '@/services/users';
 import { getCurrentUser } from '@/services/auth';
 import { getOrganizationalUnitById, OrganizationalUnit } from '@/services/organizationalUnits';
+import { getUnitTypeById, UnitType } from '@/services/unitTypes';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ export default function Profile() {
     const { toast } = useToast();
     const [user, setUser] = useState<UserData | null>(null);
     const [unit, setUnit] = useState<OrganizationalUnit | null>(null);
+    const [unitType, setUnitType] = useState<UnitType | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -41,6 +43,12 @@ export default function Profile() {
                         const unitData = await getOrganizationalUnitById(Number(userData.organizationalUnitId));
                         if (unitData) {
                             setUnit(unitData);
+                            if (unitData.unitTypeId) {
+                                const typeData = await getUnitTypeById(unitData.unitTypeId);
+                                if (typeData) {
+                                    setUnitType(typeData);
+                                }
+                            }
                         }
                     }
                 }
@@ -132,7 +140,7 @@ export default function Profile() {
                             <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                                 <Building className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <p className="text-sm font-medium">Organization</p>
+                                    <p className="text-sm font-medium">{unitType?.name || 'Unit Type'}</p>
                                     <p className="text-sm text-muted-foreground">{unit?.name || user.organizationalUnitName || 'N/A'}</p>
                                 </div>
                             </div>

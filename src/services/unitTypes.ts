@@ -58,10 +58,32 @@ export const deleteUnitType = async (unitTypeId: number): Promise<boolean> => {
     }
 };
 
+
+interface UnitTypeInnerResponse {
+    success: boolean;
+    message: string;
+    data: UnitType;
+}
+
+interface UnitTypeOuterResponse {
+    success: boolean;
+    message: string;
+    data: UnitTypeInnerResponse;
+}
+
 export const getUnitTypeById = async (unitTypeId: number): Promise<UnitType | null> => {
     try {
-        const response = await api.get<UnitType>(`/unit-types/${unitTypeId}`);
-        return response.data;
+        const response = await api.get<UnitTypeOuterResponse>(`/unit-types/${unitTypeId}`);
+        // Check if we have the double nested structure
+        if (response.data?.success && response.data?.data?.success && response.data?.data?.data) {
+            return response.data.data.data;
+        }
+        // Fallback for standard structure if api changes back
+        if (response.data?.success && (response.data as any).data && !(response.data as any).data.success) {
+            return (response.data as any).data;
+        }
+
+        return null;
     } catch (error) {
         console.error('Error getting unit type by ID:', error);
         return null;
