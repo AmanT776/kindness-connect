@@ -6,6 +6,8 @@ import { useCategories } from '@/hooks/useCategories';
 import { useOrganizationalUnits } from '@/hooks/useOrganizationalUnits';
 import { useUpdateComplaintStatus } from '@/hooks/useUpdateComplaintStatus';
 import { AdminStats } from '@/components/admin/AdminStats';
+
+import { ComplaintFilters } from '@/components/admin/ComplaintFilters';
 import { ComplaintsList } from '@/components/admin/ComplaintsList';
 import { ComplaintDetailDialog } from '@/components/admin/ComplaintDetailDialog';
 import { ComplaintData } from '@/services/compliant';
@@ -33,6 +35,10 @@ export default function StaffDashboard() {
 
     // Local state
     const [selectedComplaint, setSelectedComplaint] = useState<ComplaintData | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
+    const [anonymousFilter, setAnonymousFilter] = useState<'all' | 'anonymous' | 'identified'>('all');
 
     // dedicated mutation hooks
     const { updateStatus, isUpdating } = useUpdateComplaintStatus({
@@ -72,6 +78,23 @@ export default function StaffDashboard() {
         };
         return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
     };
+    const filteredComplaints = complaints.filter(complaint => {
+        const matchesSearch =
+            (complaint.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (complaint.referenceNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (complaint.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
+        const matchesCategory = categoryFilter === 'all' || complaint.categoryId === categoryFilter;
+        const matchesAnonymous =
+            anonymousFilter === 'all' ||
+            (anonymousFilter === 'anonymous' && complaint.isAnonymous) ||
+            (anonymousFilter === 'identified' && !complaint.isAnonymous);
+
+        return matchesSearch && matchesStatus && matchesCategory && matchesAnonymous;
+    });
+
+    // Calculate dynamic stats
 
     // Calculate dynamic stats
     const stats = {
@@ -127,9 +150,22 @@ export default function StaffDashboard() {
                 <AdminStats stats={stats} />
 
                 <div className="grid grid-cols-1 gap-8">
+                    {/* Filters */}
+                    <ComplaintFilters
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        statusFilter={statusFilter}
+                        setStatusFilter={setStatusFilter}
+                        categoryFilter={categoryFilter}
+                        setCategoryFilter={setCategoryFilter}
+                        anonymousFilter={anonymousFilter}
+                        setAnonymousFilter={setAnonymousFilter}
+                        categories={categories}
+                    />
+
                     {/* Complaints List */}
                     <ComplaintsList
-                        complaints={complaints}
+                        complaints={filteredComplaints}
                         isLoading={complaintsLoading}
                         onComplaintClick={setSelectedComplaint}
                         getCategoryName={getCategoryName}

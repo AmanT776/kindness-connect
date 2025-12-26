@@ -22,7 +22,7 @@ import { format } from 'date-fns';
 
 const Dashboard = () => {
   const { user, isAuthenticated } = useAuth();
-  const { complaints: userComplaints, isLoading, refetch } = useUserComplaints(user?.id);
+  const { complaints: userComplaints, isLoading, refetch } = useUserComplaints(user?.id ? Number(user.id) : undefined);
   const { update, isUpdating } = useUpdateComplaint();
   const { deleteComplaint, isDeleting } = useDeleteComplaint();
   const [searchTerm, setSearchTerm] = useState('');
