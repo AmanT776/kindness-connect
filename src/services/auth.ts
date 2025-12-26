@@ -81,3 +81,35 @@ export const getCurrentUser = async (): Promise<LoginResponse> => {
     }
 };
 
+export interface UpdateProfileRequest {
+    firstName: string;
+    lastName: string;
+    email: string;
+}
+
+export const updateProfile = async (data: UpdateProfileRequest): Promise<LoginResponse> => {
+    try {
+        const res = await api.put("/profile", data);
+        return res.data;
+    } catch (error: any) {
+        console.error("Error updating profile:", error);
+        throw error;
+    }
+};
+
+export interface ChangePasswordRequest {
+    currentPassword?: string;
+    newPassword?: string;
+    confirmPassword?: string;
+}
+
+export const changePassword = async (data: ChangePasswordRequest): Promise<any> => {
+    try {
+        const res = await api.put("/profile/change-password", data);
+        return res.data;
+    } catch (error: any) {
+        console.error("Error changing password:", error);
+        throw error;
+    }
+};
+
