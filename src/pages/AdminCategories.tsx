@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks/useCategories';
 import { CreateCategoryData, Category, UpdateCategoryData } from '@/services/categories';
@@ -14,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CategoryUpdateDialog } from '@/components/admin/CategoryUpdateDialog';
 import { CategoryDeleteConfirmDialog } from '@/components/admin/CategoryDeleteConfirmDialog';
 import {
-    Tag, Plus, Search, Loader2, Edit, Trash2, CheckCircle, XCircle
+    Tag, Plus, Search, Loader2, Edit, Trash2, CheckCircle, XCircle, Filter
 } from 'lucide-react';
 
 const AdminCategories = () => {
@@ -26,6 +27,7 @@ const AdminCategories = () => {
     const { toast } = useToast();
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [categoryToUpdate, setCategoryToUpdate] = useState<Category | null>(null);
     const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
@@ -130,9 +132,14 @@ const AdminCategories = () => {
     };
 
     // Filter categories
-    const filteredCategories = categories.filter(category =>
-        category.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCategories = categories.filter(category => {
+        const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus =
+            statusFilter === 'all' ? true :
+                statusFilter === 'active' ? category.isActive :
+                    !category.isActive;
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <AdminLayout>
@@ -204,17 +211,35 @@ const AdminCategories = () => {
                     </Dialog>
                 </div>
 
-                {/* Search */}
+                {/* Search and Filter */}
                 <Card className="mb-6">
                     <CardContent className="pt-6">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search categories by name..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-9"
-                            />
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search categories by name..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9"
+                                />
+                            </div>
+                            <div className="w-full md:w-[200px]">
+                                <Select
+                                    value={statusFilter}
+                                    onValueChange={(value: 'all' | 'active' | 'inactive') => setStatusFilter(value)}
+                                >
+                                    <SelectTrigger>
+                                        <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                                        <SelectValue placeholder="Filter by status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Status</SelectItem>
+                                        <SelectItem value="active">Active Only</SelectItem>
+                                        <SelectItem value="inactive">Inactive Only</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
