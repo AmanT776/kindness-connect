@@ -11,7 +11,7 @@ import { AdminStats } from '@/components/admin/AdminStats';
 import { ComplaintFilters } from '@/components/admin/ComplaintFilters';
 import { ComplaintsList } from '@/components/admin/ComplaintsList';
 import { ComplaintDetailDialog } from '@/components/admin/ComplaintDetailDialog';
-import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
+import { DeleteConfirmDialog } from '@/components/common/DeleteConfirmDialog';
 import { ComplaintData } from '@/services/compliant';
 
 const AdminDashboard = () => {
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="container py-8">
+      <div className="w-full py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-heading text-3xl font-bold">Admin Dashboard</h1>

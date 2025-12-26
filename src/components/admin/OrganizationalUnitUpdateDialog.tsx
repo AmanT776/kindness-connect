@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UpdateOrganizationalUnitData, OrganizationalUnit } from '@/services/organizationalUnits';
 import { Loader2 } from 'lucide-react';
+import { useUnitTypes } from '@/hooks/useUnitTypes';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface OrganizationalUnitUpdateDialogProps {
     unit: OrganizationalUnit | null;
@@ -21,6 +23,7 @@ export function OrganizationalUnitUpdateDialog({
     onConfirm,
     isUpdating
 }: OrganizationalUnitUpdateDialogProps) {
+    const { unitTypes, isLoading: unitTypesLoading } = useUnitTypes();
     const [formData, setFormData] = useState<UpdateOrganizationalUnitData>({
         name: '',
         unitTypeId: 1,
@@ -80,14 +83,24 @@ export function OrganizationalUnitUpdateDialog({
                             />
                         </div>
                         <div>
-                            <Label htmlFor="edit-unitTypeId">Unit Type ID *</Label>
-                            <Input
-                                id="edit-unitTypeId"
-                                type="number"
-                                value={formData.unitTypeId}
-                                onChange={(e) => handleInputChange('unitTypeId', parseInt(e.target.value))}
-                                placeholder="Unit Type ID"
-                            />
+                            <Label htmlFor="edit-unitTypeId">Unit Type *</Label>
+                            <Select
+                                value={formData.unitTypeId.toString()}
+                                onValueChange={(value) => handleInputChange('unitTypeId', parseInt(value))}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Unit Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {unitTypesLoading ? (
+                                        <SelectItem value="loading" disabled>Loading...</SelectItem>
+                                    ) : unitTypes.map((type) => (
+                                        <SelectItem key={type.id} value={type.id.toString()}>
+                                            {type.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">

@@ -7,7 +7,7 @@ import { ComplaintData } from '@/services/compliant';
 import { UserX, Loader2, Trash2, Paperclip, File, ExternalLink, User, Mail, Phone, BadgeCheck } from 'lucide-react';
 import { format } from 'date-fns';
 
-import { FilePreview } from './FilePreview';
+import { FilePreview } from '@/components/common/FilePreview';
 
 interface ComplaintDetailDialogProps {
     complaint: ComplaintData | null;
@@ -211,9 +211,13 @@ export function ComplaintDetailDialog({
                                                 </div>
                                                 <a
                                                     href={fileUrl}
+                                                    download={fileName}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-primary hover:text-primary/80 transition-colors"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                    }}
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
                                                 </a>
@@ -223,8 +227,9 @@ export function ComplaintDetailDialog({
                                                     <img
                                                         src={fileUrl}
                                                         alt={fileName}
-                                                        className="max-w-full h-auto rounded border"
+                                                        className="max-w-full h-auto rounded border cursor-pointer"
                                                         style={{ maxHeight: '400px' }}
+                                                        onClick={() => window.open(fileUrl, '_blank')}
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
                                                             target.style.display = 'none';
@@ -253,7 +258,6 @@ export function ComplaintDetailDialog({
                                         <SelectItem value="RECEIVED">Received</SelectItem>
                                         <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
                                         <SelectItem value="RESOLVED">Resolved</SelectItem>
-                                        <SelectItem value="CLOSED">Closed</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <Button onClick={handleUpdateStatus} disabled={!newStatus || isUpdating}>

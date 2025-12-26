@@ -1,22 +1,18 @@
 import api from './api';
 
-// Types
-export interface UnitType {
-    id: number;
-    name: string;
-    description: string | null;
-    status: number | null;
-    createdAt: string;
-    updatedAt: string;
-}
+import {
+    UnitType,
+    CreateUnitTypeData,
+    UpdateUnitTypeData,
+    UnitTypeInnerResponse,
+    UnitTypeOuterResponse
+} from '../types/unit-type';
 
-export interface CreateUnitTypeData {
-    name: string;
-}
-
-export interface UpdateUnitTypeData {
-    name: string;
-}
+export type {
+    UnitType,
+    CreateUnitTypeData,
+    UpdateUnitTypeData
+};
 
 export const fetchUnitTypes = async (): Promise<UnitType[]> => {
     try {
@@ -57,19 +53,6 @@ export const deleteUnitType = async (unitTypeId: number): Promise<boolean> => {
         return false;
     }
 };
-
-
-interface UnitTypeInnerResponse {
-    success: boolean;
-    message: string;
-    data: UnitType;
-}
-
-interface UnitTypeOuterResponse {
-    success: boolean;
-    message: string;
-    data: UnitTypeInnerResponse;
-}
 
 export const getUnitTypeById = async (unitTypeId: number): Promise<UnitType | null> => {
     try {

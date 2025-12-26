@@ -63,7 +63,7 @@ export function AdminSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar>
+    <Sidebar variant="floating" className="[&_[data-sidebar=sidebar]]:bg-sky-600  [&_[data-sidebar=sidebar]]:text-white">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5">
           <FileText className="h-6 w-6 text-primary" />
@@ -85,8 +85,8 @@ export function AdminSidebar() {
                       asChild
                       isActive={isActive}
                       className={cn(
-                        'w-full justify-start',
-                        isActive && 'bg-primary/10 text-primary'
+                        'w-full justify-start hover:bg-sky-700',
+                        isActive && 'bg-sky-700 text-white'
                       )}
                     >
                       <Link to={item.href}>

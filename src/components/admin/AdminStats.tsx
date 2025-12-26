@@ -48,7 +48,7 @@ export function AdminStats({ stats }: AdminStatsProps) {
                         <AlertCircle className="h-8 w-8 text-warning" />
                         <div>
                             <p className="text-2xl font-bold">{stats.received}</p>
-                            <p className="text-xs text-muted-foreground">New</p>
+                            <p className="text-xs text-muted-foreground">Received</p>
                         </div>
                     </div>
                 </CardContent>

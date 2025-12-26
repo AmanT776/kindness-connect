@@ -29,9 +29,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="w-full flex min-h-screen overflow-hidden">
         <AdminSidebar />
-        <SidebarInset className="flex flex-col flex-1">
+        <SidebarInset className="flex flex-col flex-1 overflow-auto !m-0">
           <div className="flex h-16 items-center gap-2 border-b px-4 bg-card">
             <SidebarTrigger />
             <Separator orientation="vertical" className="h-6" />

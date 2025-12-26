@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganizationalUnitsAdmin, useCreateOrganizationalUnit, useUpdateOrganizationalUnit, useDeleteOrganizationalUnit } from '@/hooks/useOrganizationalUnitsAdmin';
+import { useUnitTypes } from '@/hooks/useUnitTypes';
 import { CreateOrganizationalUnitData, OrganizationalUnit, UpdateOrganizationalUnitData } from '@/services/organizationalUnits';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { OrganizationalUnitUpdateDialog } from '@/components/admin/OrganizationalUnitUpdateDialog';
 import { OrganizationalUnitDeleteConfirmDialog } from '@/components/admin/OrganizationalUnitDeleteConfirmDialog';
 import {
@@ -19,6 +21,7 @@ import {
 const AdminOrganizationalUnits = () => {
     const { user, isAuthenticated } = useAuth();
     const { units, isLoading: unitsLoading, refetch } = useOrganizationalUnitsAdmin();
+    const { unitTypes, isLoading: unitTypesLoading } = useUnitTypes();
     const { createUnit, isCreating } = useCreateOrganizationalUnit();
     const { updateUnit, isUpdating } = useUpdateOrganizationalUnit();
     const { deleteUnit, isDeleting } = useDeleteOrganizationalUnit();
@@ -32,6 +35,8 @@ const AdminOrganizationalUnits = () => {
     // Form state for creating
     const [formData, setFormData] = useState<CreateOrganizationalUnitData>({
         name: '',
+        abbreviation: '',
+        parentId: 1,
         unitTypeId: 1,
         unitEmail: '',
         phoneNumber: '',
@@ -77,6 +82,8 @@ const AdminOrganizationalUnits = () => {
 
             setFormData({
                 name: '',
+                abbreviation: '',
+                parentId: 1,
                 unitTypeId: 1,
                 unitEmail: '',
                 phoneNumber: '',
@@ -180,14 +187,33 @@ const AdminOrganizationalUnits = () => {
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="unitTypeId">Unit Type ID *</Label>
+                                        <Label htmlFor="abbreviation">Abbreviation</Label>
                                         <Input
-                                            id="unitTypeId"
-                                            type="number"
-                                            value={formData.unitTypeId}
-                                            onChange={(e) => handleInputChange('unitTypeId', parseInt(e.target.value))}
-                                            placeholder="Unit Type ID"
+                                            id="abbreviation"
+                                            value={formData.abbreviation || ''}
+                                            onChange={(e) => handleInputChange('abbreviation', e.target.value)}
+                                            placeholder="Abbreviation"
                                         />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="unitTypeId">Unit Type *</Label>
+                                        <Select
+                                            value={formData.unitTypeId.toString()}
+                                            onValueChange={(value) => handleInputChange('unitTypeId', parseInt(value))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select Unit Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {unitTypesLoading ? (
+                                                    <SelectItem value="loading" disabled>Loading...</SelectItem>
+                                                ) : unitTypes.map((type) => (
+                                                    <SelectItem key={type.id} value={type.id.toString()}>
+                                                        {type.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -220,27 +246,23 @@ const AdminOrganizationalUnits = () => {
                                         placeholder="Additional information"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="status">Status *</Label>
-                                        <Input
-                                            id="status"
-                                            type="number"
-                                            value={formData.status}
-                                            onChange={(e) => handleInputChange('status', parseInt(e.target.value))}
-                                            placeholder="Status"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="currentUserId">Current User ID *</Label>
-                                        <Input
-                                            id="currentUserId"
-                                            type="number"
-                                            value={formData.currentUserId}
-                                            onChange={(e) => handleInputChange('currentUserId', parseInt(e.target.value))}
-                                            placeholder="Current User ID"
-                                        />
-                                    </div>
+                                <div>
+                                    <Label htmlFor="parentId">Parent Unit</Label>
+                                    <Select
+                                        value={formData.parentId?.toString() || "1"}
+                                        onValueChange={(value) => handleInputChange('parentId', parseInt(value))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Parent Unit" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {units.map((unit) => (
+                                                <SelectItem key={unit.id} value={unit.id.toString()}>
+                                                    {unit.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
@@ -370,7 +392,7 @@ const AdminOrganizationalUnits = () => {
                     isDeleting={isDeleting}
                 />
             </div>
-        </AdminLayout>
+        </AdminLayout >
     );
 };
 

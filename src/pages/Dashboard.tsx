@@ -24,7 +24,13 @@ const Dashboard = () => {
   const { user, isAuthenticated } = useAuth();
   const { complaints: userComplaints, isLoading, refetch } = useUserComplaints(user?.id ? Number(user.id) : undefined);
   const { update, isUpdating } = useUpdateComplaint();
-  const { deleteComplaint, isDeleting } = useDeleteComplaint();
+  const { deleteComplaint, isDeleting } = useDeleteComplaint({
+    onSuccess: () => {
+      setShowDeleteDialog(false);
+      setSelectedComplaint(null);
+      refetch();
+    },
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [showComplaintDialog, setShowComplaintDialog] = useState(false);
@@ -96,11 +102,7 @@ const Dashboard = () => {
   const handleDeleteConfirm = async () => {
     if (!selectedComplaint) return;
 
-    await deleteComplaint(selectedComplaint.id, () => {
-      setShowDeleteDialog(false);
-      setSelectedComplaint(null);
-      refetch();
-    });
+    await deleteComplaint(selectedComplaint.id, selectedComplaint.referenceNumber);
   };
 
   const handleCancelEdit = () => {

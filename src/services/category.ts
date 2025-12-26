@@ -1,10 +1,8 @@
 import api from "./api";
 
-export interface Category {
-    id: number;
-    name: string;
-    isActive: boolean;
-}
+import { Category } from '../types/category';
+
+export type { Category };
 
 export const getCategories = async (): Promise<Category[]> => {
     try {

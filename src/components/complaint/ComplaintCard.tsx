@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ComplaintData } from '@/services/compliant';
-import { StatusBadge } from './StatusBadge';
-import { CategoryBadge } from './CategoryBadge';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { CategoryBadge } from '@/components/common/CategoryBadge';
 import { Calendar, Paperclip, User, UserX } from 'lucide-react';
 import { format } from 'date-fns';
 

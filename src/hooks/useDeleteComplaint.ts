@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { deleteComplaint as deleteComplaintAPI } from '@/services/compliant';
 
-export function useDeleteComplaint() {
+interface UseDeleteComplaintOptions {
+    onSuccess?: () => void;
+}
+
+export function useDeleteComplaint(options?: UseDeleteComplaintOptions) {
     const { toast } = useToast();
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const deleteComplaint = async (complaintId: number, onSuccess?: () => void) => {
+    const deleteComplaint = async (complaintId: number, referenceNumber?: string) => {
         setIsDeleting(true);
         try {
             const response = await deleteComplaintAPI(complaintId);
@@ -14,12 +18,10 @@ export function useDeleteComplaint() {
             if (response.success) {
                 toast({
                     title: 'Complaint deleted',
-                    description: response.message || `Complaint has been deleted.`,
+                    description: response.message || `Complaint ${referenceNumber || complaintId} has been deleted.`,
                 });
 
-                if (onSuccess) {
-                    onSuccess();
-                }
+                options?.onSuccess?.();
             } else {
                 toast({
                     title: 'Delete failed',

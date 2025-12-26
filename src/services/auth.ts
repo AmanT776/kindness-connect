@@ -1,50 +1,22 @@
 import api from "./api";
 
-export interface RegisterRequest {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    organizationalUnitId: number;
-}
+import {
+    RegisterRequest,
+    RegisterResponse,
+    LoginRequest,
+    LoginResponse,
+    UpdateProfileRequest,
+    ChangePasswordRequest
+} from '../types/auth';
 
-export interface RegisterResponse {
-    success: boolean;
-    message: string;
-    data?: any;
-}
-
-export interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-export interface LoginUser {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string | null;
-    studentId: string | null;
-    isActive: boolean;
-    roleName: string;
-    organizationalUnitId?: number;
-    organizationalUnitName: string | null;
-    createdAt: string;
-    updatedAt: string;
-    fullName: string;
-}
-
-export interface LoginResponse {
-    success: boolean;
-    message: string;
-    data: {
-        token: string;
-        type: string;
-        user: LoginUser;
-    };
-    timestamp: string;
-}
+export type {
+    RegisterRequest,
+    RegisterResponse,
+    LoginRequest,
+    LoginResponse,
+    UpdateProfileRequest,
+    ChangePasswordRequest
+};
 
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
     try {
@@ -81,11 +53,7 @@ export const getCurrentUser = async (): Promise<LoginResponse> => {
     }
 };
 
-export interface UpdateProfileRequest {
-    firstName: string;
-    lastName: string;
-    email: string;
-}
+
 
 export const updateProfile = async (data: UpdateProfileRequest): Promise<LoginResponse> => {
     try {
@@ -96,12 +64,6 @@ export const updateProfile = async (data: UpdateProfileRequest): Promise<LoginRe
         throw error;
     }
 };
-
-export interface ChangePasswordRequest {
-    currentPassword?: string;
-    newPassword?: string;
-    confirmPassword?: string;
-}
 
 export const changePassword = async (data: ChangePasswordRequest): Promise<any> => {
     try {

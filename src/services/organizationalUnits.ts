@@ -1,49 +1,20 @@
 import api from './api';
 
-// Types
-export interface OrganizationalUnit {
-    id: number;
-    name: string;
-    parentId: number;
-    unitTypeId: number;
-    unitEmail: string;
-    phoneNumber: string;
-    remark: string;
-    status: number;
-    currentUserId: number;
-}
+import {
+    OrganizationalUnit,
+    OrganizationalUnitsResponse,
+    OrganizationalUnitResponse,
+    CreateOrganizationalUnitData,
+    UpdateOrganizationalUnitData
+} from '../types/organizational-unit';
 
-export interface OrganizationalUnitsResponse {
-    success: boolean;
-    message: string;
-    data: OrganizationalUnit[];
-}
-
-export interface OrganizationalUnitResponse {
-    success: boolean;
-    message: string;
-    data: OrganizationalUnit;
-}
-
-export interface CreateOrganizationalUnitData {
-    name: string;
-    unitTypeId: number;
-    unitEmail: string;
-    phoneNumber: string;
-    remark: string;
-    status: number;
-    currentUserId: number;
-}
-
-export interface UpdateOrganizationalUnitData {
-    name: string;
-    unitTypeId: number;
-    unitEmail: string;
-    phoneNumber: string;
-    remark: string;
-    status: number;
-    currentUserId: number;
-}
+export type {
+    OrganizationalUnit,
+    OrganizationalUnitsResponse,
+    OrganizationalUnitResponse,
+    CreateOrganizationalUnitData,
+    UpdateOrganizationalUnitData
+};
 
 export const fetchOrganizationalUnits = async (): Promise<OrganizationalUnitsResponse> => {
     try {
@@ -57,12 +28,7 @@ export const fetchOrganizationalUnits = async (): Promise<OrganizationalUnitsRes
 
 export const createOrganizationalUnit = async (unitData: CreateOrganizationalUnitData): Promise<OrganizationalUnitResponse> => {
     try {
-        // Automatically set parentId to 1
-        const dataWithParent = {
-            ...unitData,
-            parentId: 1
-        };
-        const response = await api.post<OrganizationalUnitResponse>('/units', dataWithParent);
+        const response = await api.post<OrganizationalUnitResponse>('/units', unitData);
         return response.data;
     } catch (error) {
         console.error('Error creating organizational unit:', error);
@@ -72,12 +38,7 @@ export const createOrganizationalUnit = async (unitData: CreateOrganizationalUni
 
 export const updateOrganizationalUnit = async (unitId: number, unitData: UpdateOrganizationalUnitData): Promise<OrganizationalUnitResponse> => {
     try {
-        // Automatically set parentId to 1
-        const dataWithParent = {
-            ...unitData,
-            parentId: 1
-        };
-        const response = await api.put<OrganizationalUnitResponse>(`/units/${unitId}`, dataWithParent);
+        const response = await api.put<OrganizationalUnitResponse>(`/units/${unitId}`, unitData);
         return response.data;
     } catch (error) {
         console.error('Error updating organizational unit:', error);

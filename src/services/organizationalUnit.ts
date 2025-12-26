@@ -1,18 +1,8 @@
 import api from "./api";
 
-export interface OrganizationalUnit {
-    id: number;
-    name: string;
-    abbreviation: string | null;
-    unitTypeId: number;
-    unitTypeName: string;
-    parentId: number;
-    parentName: string;
-    unitEmail: string;
-    phoneNumber: string;
-    status: string | null;
-    createTime: string | null;
-}
+import { PublicOrganizationalUnit as OrganizationalUnit } from '../types/organizational-unit';
+
+export type { OrganizationalUnit };
 
 export const getOrganizationalUnitsByParentId = async (parentId: number): Promise<OrganizationalUnit[]> => {
     try {

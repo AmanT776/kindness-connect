@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { StatusBadge } from '@/components/complaint/StatusBadge';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { Search, Calendar, Paperclip, Clock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { getComplaintByReference, ComplaintData } from '@/services/compliant';
@@ -16,7 +16,7 @@ const TrackComplaint = () => {
   const location = useLocation();
   const { categories } = useCategories();
   const { units } = useOrganizationalUnits(1);
-  
+
   const [referenceNumber, setReferenceNumber] = useState('');
   const [complaint, setComplaint] = useState<ComplaintData | null>(null);
   const [searched, setSearched] = useState(false);
@@ -33,11 +33,11 @@ const TrackComplaint = () => {
 
   const handleFetchComplaint = async (refNumber: string) => {
     if (!refNumber.trim()) return;
-    
+
     setIsLoading(true);
     setError('');
     setSearched(true);
-    
+
     try {
       const response = await getComplaintByReference(refNumber.trim());
       if (response.success && response.data) {
@@ -49,8 +49,8 @@ const TrackComplaint = () => {
     } catch (error: any) {
       console.error('Error fetching complaint:', error);
       setComplaint(null);
-      const errorMessage = error?.response?.data?.message 
-        || error?.response?.data?.error 
+      const errorMessage = error?.response?.data?.message
+        || error?.response?.data?.error
         || 'No complaint found with this reference number. Please check and try again.';
       setError(errorMessage);
     } finally {
@@ -66,7 +66,7 @@ const TrackComplaint = () => {
   // Get category and unit names
   const categoryName = categories.find(cat => cat.id === complaint?.categoryId)?.name || `Category ID: ${complaint?.categoryId}`;
   const unitName = units.find(unit => unit.id === complaint?.organizationalUnitId)?.name || `Unit ID: ${complaint?.organizationalUnitId}`;
-  
+
   // Map API status to display format
   const getStatusDisplay = (status: string) => {
     const statusMap: Record<string, { label: string; className: string }> = {
@@ -78,7 +78,7 @@ const TrackComplaint = () => {
     };
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
   };
-  
+
   const statusDisplay = complaint ? getStatusDisplay(complaint.status) : null;
 
   return (
@@ -155,7 +155,7 @@ const TrackComplaint = () => {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
                     <p className="text-sm">{complaint.description}</p>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">

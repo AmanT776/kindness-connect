@@ -1,33 +1,20 @@
 import api from './api';
 
-// Types
-export interface Category {
-    id: number;
-    name: string;
-    isActive: boolean;
-}
+import {
+    Category,
+    CategoriesResponse,
+    CategoryResponse,
+    CreateCategoryData,
+    UpdateCategoryData
+} from '../types/category';
 
-export interface CategoriesResponse {
-    success: boolean;
-    message: string;
-    data: Category[];
-}
-
-export interface CategoryResponse {
-    success: boolean;
-    message: string;
-    data: Category;
-}
-
-export interface CreateCategoryData {
-    name: string;
-    isActive: boolean;
-}
-
-export interface UpdateCategoryData {
-    name: string;
-    isActive: boolean;
-}
+export type {
+    Category,
+    CategoriesResponse,
+    CategoryResponse,
+    CreateCategoryData,
+    UpdateCategoryData
+};
 
 export const fetchCategories = async (): Promise<CategoriesResponse> => {
     try {

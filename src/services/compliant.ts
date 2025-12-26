@@ -1,38 +1,26 @@
 import api from "./api";
 
-export interface FileData {
-    id: number;
-    file_path: string;
-    createdAt: string;
-    updatedAt: string;
-}
+import {
+    FileData,
+    ComplaintData,
+    ComplaintResponse,
+    ComplaintsListResponse,
+    UpdateComplaintRequest,
+    UpdateStatusRequest,
+    UpdateStatusResponse,
+    DeleteComplaintResponse
+} from '../types/complaint';
 
-export interface ComplaintData {
-    id: number;
-    referenceNumber: string;
-    title: string;
-    description: string;
-    isAnonymous: boolean;
-    status: string;
-    organizationalUnitId: number;
-    categoryId: number;
-    userId: number | null;
-    files: FileData[];
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface ComplaintResponse {
-    success: boolean;
-    message: string;
-    data: ComplaintData;
-}
-
-export interface ComplaintsListResponse {
-    success: boolean;
-    message: string;
-    data: ComplaintData[];
-}
+export type {
+    FileData,
+    ComplaintData,
+    ComplaintResponse,
+    ComplaintsListResponse,
+    UpdateComplaintRequest,
+    UpdateStatusRequest,
+    UpdateStatusResponse,
+    DeleteComplaintResponse
+};
 
 export const createComplaint = async (data: FormData): Promise<ComplaintResponse> => {
     // Log FormData contents for debugging
@@ -105,12 +93,6 @@ export const getComplaintsByOrgId = async (orgId: number): Promise<ComplaintsLis
     }
 };
 
-export interface UpdateComplaintRequest {
-    title?: string;
-    description?: string;
-    categoryId?: number;
-    organizationalUnitId?: number;
-}
 
 // Update to accept FormData or object
 export const updateComplaint = async (id: number, data: UpdateComplaintRequest): Promise<ComplaintResponse> => {
@@ -140,16 +122,6 @@ export const updateComplaint = async (id: number, data: UpdateComplaintRequest):
     }
 };
 
-export interface UpdateStatusRequest {
-    status: string;
-}
-
-export interface UpdateStatusResponse {
-    success: boolean;
-    message: string;
-    data?: ComplaintData;
-}
-
 export const updateComplaintStatus = async (id: number, data: UpdateStatusRequest): Promise<UpdateStatusResponse> => {
     try {
 
@@ -170,11 +142,6 @@ export const updateComplaintStatus = async (id: number, data: UpdateStatusReques
         throw error;
     }
 };
-
-export interface DeleteComplaintResponse {
-    success: boolean;
-    message: string;
-}
 
 export const deleteComplaint = async (id: number): Promise<DeleteComplaintResponse> => {
     try {
