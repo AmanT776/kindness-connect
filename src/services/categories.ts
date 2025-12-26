@@ -39,6 +39,16 @@ export const fetchCategories = async (): Promise<CategoriesResponse> => {
     }
 };
 
+export const getActiveCategories = async (): Promise<CategoriesResponse> => {
+    try {
+        const response = await api.get<CategoriesResponse>('/org/categories/active');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching active categories:', error);
+        throw error;
+    }
+};
+
 export const createCategory = async (categoryData: CreateCategoryData): Promise<CategoryResponse> => {
     try {
         const response = await api.post<CategoryResponse>('/org/categories', categoryData);

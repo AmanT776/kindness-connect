@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { fetchCategories, createCategory, updateCategory, deleteCategory as deleteCategoryAPI, Category, CreateCategoryData, UpdateCategoryData } from '@/services/categories';
+import { fetchCategories, getActiveCategories, createCategory, updateCategory, deleteCategory as deleteCategoryAPI, Category, CreateCategoryData, UpdateCategoryData } from '@/services/categories';
 
-export function useCategories() {
+export function useCategories(options?: { activeOnly?: boolean }) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -10,7 +10,8 @@ export function useCategories() {
         try {
             setIsLoading(true);
             setError(null);
-            const response = await fetchCategories();
+            const fetchFn = options?.activeOnly ? getActiveCategories : fetchCategories;
+            const response = await fetchFn();
 
             if (response.success) {
                 setCategories(response.data);
@@ -26,7 +27,7 @@ export function useCategories() {
 
     useEffect(() => {
         loadCategories();
-    }, []);
+    }, [options?.activeOnly]);
 
     const refetch = () => {
         loadCategories();

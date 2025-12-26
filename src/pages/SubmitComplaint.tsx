@@ -35,7 +35,7 @@ const SubmitComplaint = () => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
-  const { categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
+  const { categories, isLoading: categoriesLoading, error: categoriesError } = useCategories({ activeOnly: true });
   const { units, isLoading: unitsLoading, error: unitsError } = useOrganizationalUnits(1); // parentId = 1
 
   const [isLoading, setIsLoading] = useState(false);
@@ -130,12 +130,12 @@ const SubmitComplaint = () => {
       console.error('Error submitting complaint:', error);
       console.error('Error response data:', error?.response?.data);
       console.error('Error status:', error?.response?.status);
-      
-      const errorMessage = error?.response?.data?.message 
-        || error?.response?.data?.error 
-        || error?.message 
+
+      const errorMessage = error?.response?.data?.message
+        || error?.response?.data?.error
+        || error?.message
         || 'There was a problem submitting your complaint. Please try again.';
-      
+
       toast({
         title: 'Submission failed',
         description: errorMessage,
