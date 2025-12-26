@@ -28,6 +28,7 @@ export interface LoginUser {
     studentId: string | null;
     isActive: boolean;
     roleName: string;
+    organizationalUnitId?: number;
     organizationalUnitName: string | null;
     createdAt: string;
     updatedAt: string;

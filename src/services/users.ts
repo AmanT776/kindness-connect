@@ -23,6 +23,17 @@ export interface CreateUserData {
     password: string;
     organizationalUnitId: string;
     roleId: number;
+    phoneNumber?: string;
+}
+
+export interface UpdateUserData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password?: string;
+    phoneNumber?: string;
+    roleId: number;
+    organizationalUnitId: number;
 }
 
 export interface CreateUserResponse {
@@ -68,7 +79,6 @@ export interface UsersResponse {
     timestamp: string;
 }
 
-// API Functions
 export const fetchUsers = async (page: number = 0, size: number = 10): Promise<UsersResponse> => {
     try {
         const response = await api.get<UsersResponse>('/admin/users', {
@@ -78,7 +88,6 @@ export const fetchUsers = async (page: number = 0, size: number = 10): Promise<U
             }
         });
 
-        // The axios response.data IS the UsersResponse object based on the API contract
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -96,12 +105,29 @@ export const createUser = async (userData: CreateUserData): Promise<CreateUserRe
     }
 };
 
-// Helper function to get all users (flattened from paginated response)
+export const updateUser = async (userId: number, userData: UpdateUserData): Promise<CreateUserResponse> => {
+    try {
+        const response = await api.put<CreateUserResponse>(`/admin/users/${userId}`, userData);
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        console.error('Error updating user:', error);
+        throw error;
+    }
+};
+
+export const deleteUser = async (userId: number): Promise<boolean> => {
+    try {
+        const response = await api.delete(`/admin/users/${userId}`);
+        return response.status === 200 || response.status === 204;
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+    }
+};
+
 export const fetchAllUsers = async (): Promise<UserData[]> => {
     try {
-        // Get a large page to get all users
-        // Note: Ideally backend should support unpaged fetch or we should loop. 
-        // For now adhering to existing logic but using new fetchUsers
         const response = await fetchUsers(0, 1000);
         if (response.success) {
             return response.data.content;
@@ -113,7 +139,6 @@ export const fetchAllUsers = async (): Promise<UserData[]> => {
     }
 };
 
-// Helper function to get user by ID
 export const getUserById = async (userId: number): Promise<UserData | null> => {
     try {
         const users = await fetchAllUsers();
@@ -124,7 +149,6 @@ export const getUserById = async (userId: number): Promise<UserData | null> => {
     }
 };
 
-// Helper function to get users by role
 export const getUsersByRole = async (roleName: string): Promise<UserData[]> => {
     try {
         const users = await fetchAllUsers();
@@ -132,5 +156,18 @@ export const getUsersByRole = async (roleName: string): Promise<UserData[]> => {
     } catch (error) {
         console.error('Error getting users by role:', error);
         return [];
+    }
+};
+
+export const getStaffUserById = async (userId: number): Promise<UserData> => {
+    try {
+        const response = await api.get<any>(`/admin/staff/users/${userId}`);
+        if (response.data.success) {
+            return response.data.data;
+        }
+        throw new Error(response.data.message || 'Failed to fetch user details');
+    } catch (error) {
+        console.error('Error fetching staff user details:', error);
+        throw error;
     }
 };

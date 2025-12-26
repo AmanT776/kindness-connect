@@ -4,10 +4,11 @@ import { login as loginAPI, LoginUser } from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<User | null>;
   signup: (email: string, password: string, name: string, department?: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,11 +16,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Map API user to app User type
 const mapApiUserToUser = (apiUser: LoginUser): User => {
   // Map roleName to role
-  let role: 'student' | 'officer' | 'admin' = 'student';
+  let role: 'student' | 'staff' | 'admin' = 'student';
   if (apiUser.roleName === 'ADMIN') {
     role = 'admin';
-  } else if (apiUser.roleName === 'OFFICER') {
-    role = 'officer';
+  } else if (apiUser.roleName === 'STAFF' || apiUser.roleName === 'OFFICER') {
+    role = 'staff';
   } else {
     role = 'student';
   }
@@ -30,17 +31,19 @@ const mapApiUserToUser = (apiUser: LoginUser): User => {
     name: apiUser.fullName || `${apiUser.firstName} ${apiUser.lastName}`,
     role,
     department: apiUser.organizationalUnitName || undefined,
+    organizationalUnitId: apiUser.organizationalUnitId,
   };
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check for stored token and user on mount
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
-    
+
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -51,27 +54,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
       }
     }
+    setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<User | null> => {
     try {
       const response = await loginAPI({ email, password });
-      
+
       if (response.success && response.data) {
         // Store token
         localStorage.setItem('authToken', response.data.token);
-        
+
         // Map and store user
         const mappedUser = mapApiUserToUser(response.data.user);
         setUser(mappedUser);
         localStorage.setItem('user', JSON.stringify(mappedUser));
-        
-        return true;
+
+        return mappedUser;
       }
-      return false;
+      return null;
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      return null;
     }
   };
 
@@ -87,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated: !!user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

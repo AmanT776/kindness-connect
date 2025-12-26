@@ -42,15 +42,15 @@ const menuItems = [
     icon: Layers,
     href: '/admin/organizational-unit-type',
   },
-  {
-    title: 'Permission',
-    icon: Shield,
-    href: '/admin/permission',
-  },
+  // {
+  //   title: 'Permission',
+  //   icon: Shield,
+  //   href: '/admin/permission',
+  // },
   {
     title: 'Role',
     icon: UserCog,
-    href: '/admin/role',
+    href: '/admin/roles',
   },
   {
     title: 'User',
@@ -78,7 +78,7 @@ export function AdminSidebar() {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
-                
+
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton

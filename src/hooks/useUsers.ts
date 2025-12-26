@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchUsers, fetchAllUsers, createUser, UserData, CreateUserData, UsersResponse } from '@/services/users';
+import { fetchUsers, fetchAllUsers, createUser, updateUser, deleteUser as deleteUserAPI, UserData, CreateUserData, UpdateUserData, UsersResponse } from '@/services/users';
 
 export function useUsers(page: number = 0, size: number = 10) {
     const [users, setUsers] = useState<UserData[]>([]);
@@ -108,6 +108,64 @@ export function useCreateUser() {
     return {
         createUser: createUserMutation,
         isCreating,
+        error,
+    };
+}
+
+export function useUpdateUser() {
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const updateUserMutation = async (userId: number, userData: UpdateUserData): Promise<UserData | null> => {
+        try {
+            setIsUpdating(true);
+            setError(null);
+            const response = await updateUser(userId, userData);
+
+            if (response.success) {
+                return response.data;
+            } else {
+                setError(response.message || 'Failed to update user');
+                return null;
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
+            setError(errorMessage);
+            return null;
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    return {
+        updateUser: updateUserMutation,
+        isUpdating,
+        error,
+    };
+}
+
+export function useDeleteUser() {
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const deleteUserMutation = async (userId: number): Promise<boolean> => {
+        try {
+            setIsDeleting(true);
+            setError(null);
+            await deleteUserAPI(userId);
+            return true;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to delete user';
+            setError(errorMessage);
+            return false;
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return {
+        deleteUser: deleteUserMutation,
+        isDeleting,
         error,
     };
 }

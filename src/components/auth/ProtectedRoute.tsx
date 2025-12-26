@@ -1,20 +1,30 @@
 import { Navigate } from 'react-router-dom';
-import { ReactNode } from 'react';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { User } from '@/lib/mockData';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children: React.ReactNode;
+  allowedRoles?: string[];
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // Check if auth token exists in localStorage
-  const token = localStorage.getItem('authToken');
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+  const { user, isAuthenticated, isLoading } = useAuth();
 
-  // If no token, redirect to login page
-  if (!token) {
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a proper loading spinner
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // If token exists, render the protected component
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    // Redirect to appropriate dashboard based on role
+    if (user.role === 'admin') return <Navigate to="/admin" replace />;
+    if (user.role === 'staff') return <Navigate to="/staff" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 }
-

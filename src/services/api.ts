@@ -1,6 +1,4 @@
 import axios, { AxiosRequestHeaders } from "axios";
-import { toast } from "sonner";
-
 
 
 const api = axios.create({

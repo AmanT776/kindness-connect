@@ -5,12 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useComplaintsList } from '@/hooks/useComplaints';
 import { useCategories } from '@/hooks/useCategories';
 import { useOrganizationalUnits } from '@/hooks/useOrganizationalUnits';
-import { useComplaintOperations } from '@/hooks/useComplaintOperations';
+import { useUpdateComplaintStatus } from '@/hooks/useUpdateComplaintStatus';
+import { useDeleteComplaint } from '@/hooks/useDeleteComplaint';
 import { AdminStats } from '@/components/admin/AdminStats';
 import { ComplaintFilters } from '@/components/admin/ComplaintFilters';
 import { ComplaintsList } from '@/components/admin/ComplaintsList';
 import { ComplaintDetailDialog } from '@/components/admin/ComplaintDetailDialog';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
+import { ComplaintData } from '@/services/compliant';
 
 const AdminDashboard = () => {
   const { user, isAuthenticated } = useAuth();
@@ -23,18 +25,50 @@ const AdminDashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
   const [anonymousFilter, setAnonymousFilter] = useState<'all' | 'anonymous' | 'identified'>('all');
 
-  const {
-    selectedComplaint,
-    setSelectedComplaint,
-    isUpdatingStatus,
-    isDeleting,
-    showDeleteDialog,
-    complaintToDelete,
-    handleUpdateStatus,
-    handleDeleteClick,
-    handleDeleteConfirm,
-    closeDeleteDialog,
-  } = useComplaintOperations(refetch);
+  // Local state for dialogs and selected complaint
+  const [selectedComplaint, setSelectedComplaint] = useState<ComplaintData | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [complaintToDelete, setComplaintToDelete] = useState<ComplaintData | null>(null);
+
+  // Use dedicated hooks
+  const { updateStatus, isUpdating } = useUpdateComplaintStatus({
+    onSuccess: () => {
+      setSelectedComplaint(null);
+      refetch();
+    },
+  });
+
+  const { deleteComplaint, isDeleting } = useDeleteComplaint({
+    onSuccess: () => {
+      setShowDeleteDialog(false);
+      setComplaintToDelete(null);
+      if (selectedComplaint?.id === complaintToDelete?.id) {
+        setSelectedComplaint(null);
+      }
+      refetch();
+    },
+  });
+
+  // Handler functions
+  const handleUpdateStatus = async (status: string) => {
+    if (!selectedComplaint || !status) return;
+    await updateStatus(selectedComplaint.id, status, selectedComplaint.referenceNumber);
+  };
+
+  const handleDeleteClick = (complaint: ComplaintData) => {
+    setComplaintToDelete(complaint);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!complaintToDelete) return;
+    await deleteComplaint(complaintToDelete.id, complaintToDelete.referenceNumber);
+  };
+
+  const closeDeleteDialog = () => {
+    setShowDeleteDialog(false);
+    setComplaintToDelete(null);
+  };
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -136,7 +170,7 @@ const AdminDashboard = () => {
           getCategoryName={getCategoryName}
           getUnitName={getUnitName}
           getStatusDisplay={getStatusDisplay}
-          isUpdatingStatus={isUpdatingStatus}
+          isUpdating={isUpdating}
         />
 
         {/* Delete Confirmation Dialog */}

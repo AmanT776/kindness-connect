@@ -22,14 +22,22 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      
-      if (success) {
+      const user = await login(email, password);
+
+      if (user) {
         toast({
           title: 'Welcome back!',
           description: 'You have been logged in successfully.',
         });
-        navigate('/dashboard');
+
+        // Redirect based on role
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else if (user.role === 'staff') {
+          navigate('/staff');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         toast({
           title: 'Login failed',
@@ -39,10 +47,10 @@ const Login = () => {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error?.response?.data?.message 
-        || error?.response?.data?.error 
+      const errorMessage = error?.response?.data?.message
+        || error?.response?.data?.error
         || 'Login failed. Please try again.';
-      
+
       toast({
         title: 'Login failed',
         description: errorMessage,
@@ -87,7 +95,7 @@ const Login = () => {
                   required
                 />
               </div>
-              
+
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <Button type="submit" className="w-full" disabled={isLoading}>

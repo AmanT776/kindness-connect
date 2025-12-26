@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ComplaintData } from '@/services/compliant';
-import { User, UserX, Calendar, Filter, Loader2 } from 'lucide-react';
+import { User, UserX, Calendar, Filter, Loader2, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Category {
@@ -77,6 +77,12 @@ export function ComplaintsList({
                                             <Calendar className="h-3 w-3" />
                                             {format(new Date(complaint.createdAt), 'MMM d')}
                                         </span>
+                                        {complaint.files && complaint.files.length > 0 && (
+                                            <span className="text-xs text-muted-foreground flex items-center gap-1 bg-muted px-2 py-1 rounded">
+                                                <Paperclip className="h-3 w-3" />
+                                                {complaint.files.length} {complaint.files.length === 1 ? 'file' : 'files'}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             );

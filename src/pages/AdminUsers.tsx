@@ -10,9 +10,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganizationalUnits } from '@/hooks/useOrganizationalUnits';
 import { useRoles } from '@/hooks/useRoles';
-import { useAllUsers, useCreateUser } from '@/hooks/useUsers';
-import { CreateUserData } from '@/services/users';
+import { useAllUsers, useCreateUser, useDeleteUser, useUpdateUser } from '@/hooks/useUsers';
+import { CreateUserData, UserData, UpdateUserData } from '@/services/users';
 import { useToast } from '@/hooks/use-toast';
+import { UserDeleteConfirmDialog } from '@/components/admin/UserDeleteConfirmDialog';
+import { UserUpdateDialog } from '@/components/admin/UserUpdateDialog';
 import {
     Users, Plus, Search, Loader2, User, Mail,
     Building2, Shield, Edit, Trash2
@@ -24,10 +26,14 @@ const AdminUsers = () => {
     const { roles, isLoading: rolesLoading } = useRoles();
     const { users, isLoading: usersLoading, refetch } = useAllUsers();
     const { createUser, isCreating } = useCreateUser();
+    const { deleteUser, isDeleting } = useDeleteUser();
+    const { updateUser, isUpdating } = useUpdateUser();
     const { toast } = useToast();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
+    const [userToUpdate, setUserToUpdate] = useState<UserData | null>(null);
 
     // Form state
     const [formData, setFormData] = useState<CreateUserData>({
@@ -82,6 +88,7 @@ const AdminUsers = () => {
                 email: '',
                 password: '',
                 organizationalUnitId: '',
+                phoneNumber: '',
                 roleId: 0,
             });
 
@@ -91,6 +98,48 @@ const AdminUsers = () => {
             toast({
                 title: 'Error',
                 description: 'Failed to create user. Please try again.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    // Handle delete user
+    const handleDeleteUser = async () => {
+        if (!userToDelete) return;
+
+        const success = await deleteUser(userToDelete.id);
+
+        if (success) {
+            toast({
+                title: 'Success',
+                description: 'User deleted successfully',
+            });
+            refetch();
+            setUserToDelete(null);
+        } else {
+            toast({
+                title: 'Error',
+                description: 'Failed to delete user. Please try again.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    // Handle update user
+    const handleUpdateUser = async (userId: number, data: UpdateUserData) => {
+        const updatedUser = await updateUser(userId, data);
+
+        if (updatedUser) {
+            toast({
+                title: 'Success',
+                description: 'User updated successfully',
+            });
+            refetch();
+            setUserToUpdate(null);
+        } else {
+            toast({
+                title: 'Error',
+                description: 'Failed to update user. Please try again.',
                 variant: 'destructive',
             });
         }
@@ -192,13 +241,13 @@ const AdminUsers = () => {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="role">Role *</Label>
+                                    <Label  htmlFor="role">Role *</Label>
                                     <Select
                                         value={formData.roleId.toString()}
                                         onValueChange={(value) => handleInputChange('roleId', parseInt(value))}
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select role" />
+                                         <SelectTrigger>
+                                            <SelectValue  placeholder="Select user role" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {rolesLoading ? (
@@ -328,10 +377,18 @@ const AdminUsers = () => {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setUserToUpdate(userData)}
+                                            >
                                                 <Edit className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="outline" size="sm">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setUserToDelete(userData)}
+                                            >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -341,6 +398,22 @@ const AdminUsers = () => {
                         )}
                     </CardContent>
                 </Card>
+
+                <UserDeleteConfirmDialog
+                    user={userToDelete}
+                    isOpen={!!userToDelete}
+                    onClose={() => setUserToDelete(null)}
+                    onConfirm={handleDeleteUser}
+                    isDeleting={isDeleting}
+                />
+
+                <UserUpdateDialog
+                    user={userToUpdate}
+                    isOpen={!!userToUpdate}
+                    onClose={() => setUserToUpdate(null)}
+                    onConfirm={handleUpdateUser}
+                    isUpdating={isUpdating}
+                />
             </div>
         </AdminLayout>
     );

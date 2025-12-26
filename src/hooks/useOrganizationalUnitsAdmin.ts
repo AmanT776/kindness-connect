@@ -1,63 +1,71 @@
 import { useState, useEffect } from 'react';
-import { fetchCategories, createCategory, updateCategory, deleteCategory as deleteCategoryAPI, Category, CreateCategoryData, UpdateCategoryData } from '@/services/categories';
+import {
+    fetchOrganizationalUnits,
+    createOrganizationalUnit,
+    updateOrganizationalUnit,
+    deleteOrganizationalUnit as deleteOrganizationalUnitAPI,
+    OrganizationalUnit,
+    CreateOrganizationalUnitData,
+    UpdateOrganizationalUnitData
+} from '@/services/organizationalUnits';
 
-export function useCategories() {
-    const [categories, setCategories] = useState<Category[]>([]);
+export function useOrganizationalUnitsAdmin() {
+    const [units, setUnits] = useState<OrganizationalUnit[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const loadCategories = async () => {
+    const loadUnits = async () => {
         try {
             setIsLoading(true);
             setError(null);
-            const response = await fetchCategories();
+            const response = await fetchOrganizationalUnits();
 
             if (response.success) {
-                setCategories(response.data);
+                setUnits(response.data);
             } else {
-                setError(response.message || 'Failed to fetch categories');
+                setError(response.message || 'Failed to fetch organizational units');
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to fetch categories');
+            setError(err instanceof Error ? err.message : 'Failed to fetch organizational units');
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        loadCategories();
+        loadUnits();
     }, []);
 
     const refetch = () => {
-        loadCategories();
+        loadUnits();
     };
 
     return {
-        categories,
+        units,
         isLoading,
         error,
         refetch,
     };
 }
 
-export function useCreateCategory() {
+export function useCreateOrganizationalUnit() {
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const createCategoryMutation = async (categoryData: CreateCategoryData): Promise<Category | null> => {
+    const createUnit = async (unitData: CreateOrganizationalUnitData): Promise<OrganizationalUnit | null> => {
         try {
             setIsCreating(true);
             setError(null);
-            const response = await createCategory(categoryData);
+            const response = await createOrganizationalUnit(unitData);
 
             if (response.success) {
                 return response.data;
             } else {
-                setError(response.message || 'Failed to create category');
+                setError(response.message || 'Failed to create organizational unit');
                 return null;
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to create category';
+            const errorMessage = err instanceof Error ? err.message : 'Failed to create organizational unit';
             setError(errorMessage);
             return null;
         } finally {
@@ -66,30 +74,30 @@ export function useCreateCategory() {
     };
 
     return {
-        createCategory: createCategoryMutation,
+        createUnit,
         isCreating,
         error,
     };
 }
 
-export function useUpdateCategory() {
+export function useUpdateOrganizationalUnit() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const updateCategoryMutation = async (categoryId: number, categoryData: UpdateCategoryData): Promise<Category | null> => {
+    const updateUnit = async (unitId: number, unitData: UpdateOrganizationalUnitData): Promise<OrganizationalUnit | null> => {
         try {
             setIsUpdating(true);
             setError(null);
-            const response = await updateCategory(categoryId, categoryData);
+            const response = await updateOrganizationalUnit(unitId, unitData);
 
             if (response.success) {
                 return response.data;
             } else {
-                setError(response.message || 'Failed to update category');
+                setError(response.message || 'Failed to update organizational unit');
                 return null;
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to update category';
+            const errorMessage = err instanceof Error ? err.message : 'Failed to update organizational unit';
             setError(errorMessage);
             return null;
         } finally {
@@ -98,24 +106,24 @@ export function useUpdateCategory() {
     };
 
     return {
-        updateCategory: updateCategoryMutation,
+        updateUnit,
         isUpdating,
         error,
     };
 }
 
-export function useDeleteCategory() {
+export function useDeleteOrganizationalUnit() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const deleteCategoryMutation = async (categoryId: number): Promise<boolean> => {
+    const deleteUnit = async (unitId: number): Promise<boolean> => {
         try {
             setIsDeleting(true);
             setError(null);
-            await deleteCategoryAPI(categoryId);
+            await deleteOrganizationalUnitAPI(unitId);
             return true;
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to delete category';
+            const errorMessage = err instanceof Error ? err.message : 'Failed to delete organizational unit';
             setError(errorMessage);
             return false;
         } finally {
@@ -124,7 +132,7 @@ export function useDeleteCategory() {
     };
 
     return {
-        deleteCategory: deleteCategoryMutation,
+        deleteUnit,
         isDeleting,
         error,
     };

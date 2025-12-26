@@ -13,7 +13,12 @@ import SubmitComplaint from "./pages/SubmitComplaint";
 import TrackComplaint from "./pages/TrackComplaint";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import StaffDashboard from "./pages/StaffDashboard";
 import AdminUsers from "./pages/AdminUsers";
+import AdminRoles from "./pages/AdminRoles";
+import AdminCategories from "./pages/AdminCategories";
+import AdminOrganizationalUnits from "./pages/AdminOrganizationalUnits";
+import AdminUnitTypes from "./pages/AdminUnitTypes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,15 +40,23 @@ const App = () => (
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['student']}>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff"
+                element={
+                  <ProtectedRoute allowedRoles={['staff']}>
+                    <StaffDashboard />
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <AdminDashboard />
                   </ProtectedRoute>
                 }
@@ -51,8 +64,40 @@ const App = () => (
               <Route
                 path="/admin/user"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/roles"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminRoles />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/category"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminCategories />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/organizational-unit"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminOrganizationalUnits />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/organizational-unit-type"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminUnitTypes />
                   </ProtectedRoute>
                 }
               />

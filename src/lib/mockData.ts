@@ -26,8 +26,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'officer' | 'admin';
+  role: 'student' | 'staff' | 'admin';
   department?: string;
+  organizationalUnitId?: number;
 }
 
 export const departments = [
@@ -66,7 +67,7 @@ export const statusLabels: Record<ComplaintStatus, string> = {
 // Mock users
 export const mockUsers: User[] = [
   { id: '1', email: 'student@university.edu', name: 'John Smith', role: 'student', department: 'Computer Science' },
-  { id: '2', email: 'officer@university.edu', name: 'Sarah Johnson', role: 'officer' },
+  { id: '2', email: 'officer@university.edu', name: 'Sarah Johnson', role: 'staff' },
   { id: '3', email: 'admin@university.edu', name: 'Michael Brown', role: 'admin' },
 ];
 
