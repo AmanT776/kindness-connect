@@ -142,12 +142,10 @@ export default function StaffDashboard() {
                     complaint={selectedComplaint}
                     isOpen={!!selectedComplaint}
                     onClose={() => setSelectedComplaint(null)}
-                    onUpdateStatus={handleUpdateStatus}
-                    onDeleteClick={() => { }} // Staff might not have delete permission, or implement if needed
                     getCategoryName={getCategoryName}
                     getUnitName={getUnitName}
                     getStatusDisplay={getStatusDisplay}
-                    isUpdating={isUpdating}
+                    readOnly={true}
                 />
             </div>
         </div>

@@ -13,12 +13,13 @@ interface ComplaintDetailDialogProps {
     complaint: ComplaintData | null;
     isOpen: boolean;
     onClose: () => void;
-    onUpdateStatus: (status: string) => Promise<void>;
-    onDeleteClick: (complaint: ComplaintData) => void;
+    onUpdateStatus?: (status: string) => Promise<void>;
+    onDeleteClick?: (complaint: ComplaintData) => void;
     getCategoryName: (categoryId: number) => string;
     getUnitName: (unitId: number) => string;
     getStatusDisplay: (status: string) => { label: string; className: string };
-    isUpdating: boolean;
+    isUpdating?: boolean;
+    readOnly?: boolean;
 }
 
 export function ComplaintDetailDialog({
@@ -30,7 +31,8 @@ export function ComplaintDetailDialog({
     getCategoryName,
     getUnitName,
     getStatusDisplay,
-    isUpdating
+    isUpdating,
+    readOnly = false
 }: ComplaintDetailDialogProps) {
     const [newStatus, setNewStatus] = useState<string>('');
     const [userDetails, setUserDetails] = useState<UserData | null>(null);
@@ -62,7 +64,7 @@ export function ComplaintDetailDialog({
     }, [complaint, isOpen]);
 
     const handleUpdateStatus = async () => {
-        if (!newStatus) return;
+        if (!newStatus || !onUpdateStatus) return;
         await onUpdateStatus(newStatus);
         setNewStatus('');
     };
@@ -238,45 +240,49 @@ export function ComplaintDetailDialog({
                     )}
 
                     {/* Status Update */}
-                    <div className="border-t pt-4">
-                        <h4 className="font-medium mb-3">Update Status</h4>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <Select value={newStatus} onValueChange={setNewStatus}>
-                                <SelectTrigger className="flex-1">
-                                    <SelectValue placeholder="Select new status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="PENDING">Pending</SelectItem>
-                                    <SelectItem value="RECEIVED">Received</SelectItem>
-                                    <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
-                                    <SelectItem value="RESOLVED">Resolved</SelectItem>
-                                    <SelectItem value="CLOSED">Closed</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button onClick={handleUpdateStatus} disabled={!newStatus || isUpdating}>
-                                {isUpdating ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Updating...
-                                    </>
-                                ) : (
-                                    'Update'
-                                )}
-                            </Button>
+                    {!readOnly && (
+                        <div className="border-t pt-4">
+                            <h4 className="font-medium mb-3">Update Status</h4>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Select value={newStatus} onValueChange={setNewStatus}>
+                                    <SelectTrigger className="flex-1">
+                                        <SelectValue placeholder="Select new status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="PENDING">Pending</SelectItem>
+                                        <SelectItem value="RECEIVED">Received</SelectItem>
+                                        <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                                        <SelectItem value="RESOLVED">Resolved</SelectItem>
+                                        <SelectItem value="CLOSED">Closed</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Button onClick={handleUpdateStatus} disabled={!newStatus || isUpdating}>
+                                    {isUpdating ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Updating...
+                                        </>
+                                    ) : (
+                                        'Update'
+                                    )}
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <DialogFooter className="flex justify-between">
-                    <Button
-                        variant="destructive"
-                        onClick={() => onDeleteClick(complaint)}
-                        className="mr-auto"
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                    </Button>
-                    <Button variant="outline" onClick={onClose}>
+                    {!readOnly && onDeleteClick && (
+                        <Button
+                            variant="destructive"
+                            onClick={() => onDeleteClick(complaint)}
+                            className="mr-auto"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </Button>
+                    )}
+                    <Button variant="outline" onClick={onClose} className={readOnly ? "w-full sm:w-auto ml-auto" : ""}>
                         Close
                     </Button>
                 </DialogFooter>
