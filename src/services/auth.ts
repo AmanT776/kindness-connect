@@ -70,3 +70,14 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     }
 };
 
+export const getCurrentUser = async (): Promise<LoginResponse> => {
+    try {
+        const res = await api.get("/auth/me");
+        console.log(res.data)
+        return res.data;
+    } catch (error: any) {
+        console.error("Error fetching current user:", error);
+        throw error;
+    }
+};
+

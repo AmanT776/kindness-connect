@@ -210,7 +210,7 @@ export function ComplaintDetailDialog({
                                                     </p>
                                                 </div>
                                                 <a
-                                                    href={fileUrl}
+                                                    href={file.file_path}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-primary hover:text-primary/80 transition-colors"
@@ -240,7 +240,7 @@ export function ComplaintDetailDialog({
                     )}
 
                     {/* Status Update */}
-                    {!readOnly && (
+                    {onUpdateStatus && (
                         <div className="border-t pt-4">
                             <h4 className="font-medium mb-3">Update Status</h4>
                             <div className="flex flex-col sm:flex-row gap-3">

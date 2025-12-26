@@ -11,6 +11,7 @@ export interface UserData {
     isActive: boolean;
     roleName: string;
     organizationalUnitName: string | null;
+    organizationalUnitId?: number | null;
     createdAt: string;
     updatedAt: string;
     fullName: string;

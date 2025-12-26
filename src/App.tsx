@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SubmitComplaint from "./pages/SubmitComplaint";
 import TrackComplaint from "./pages/TrackComplaint";
+import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -37,6 +38,14 @@ const App = () => (
               <Route path="/signup" element={<Signup />} />
               <Route path="/submit" element={<SubmitComplaint />} />
               <Route path="/track" element={<TrackComplaint />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute allowedRoles={['student', 'staff', 'admin']}>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/dashboard"
                 element={

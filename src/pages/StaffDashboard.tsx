@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrgComplaints } from '@/hooks/useComplaints';
 import { useCategories } from '@/hooks/useCategories';
@@ -129,6 +129,13 @@ export default function StaffDashboard() {
                                 <p className="text-xs text-muted-foreground">{user.email}</p>
                             </div>
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                                    <User className="mr-2 h-4 w-4" />
+                                    Profile
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                                 <LogOut className="mr-2 h-4 w-4" />
                                 Log out
@@ -178,6 +185,7 @@ export default function StaffDashboard() {
                     complaint={selectedComplaint}
                     isOpen={!!selectedComplaint}
                     onClose={() => setSelectedComplaint(null)}
+                    onUpdateStatus={handleUpdateStatus}
                     getCategoryName={getCategoryName}
                     getUnitName={getUnitName}
                     getStatusDisplay={getStatusDisplay}

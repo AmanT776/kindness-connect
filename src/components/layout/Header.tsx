@@ -1,12 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { FileText, LogOut, User, Menu, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
@@ -32,9 +32,9 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <img 
-            src="/bahirdar-university-logo.png" 
-            alt="Bahir Dar University Logo" 
+          <img
+            src="/bahirdar-university-logo.png"
+            alt="Bahir Dar University Logo"
             className="h-10 w-auto object-contain"
             onError={(e) => {
               // Hide image and show fallback icon if logo not found
@@ -55,9 +55,9 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           {navLinks.map(link => (
-            <Link 
-              key={link.href} 
-              to={link.href} 
+            <Link
+              key={link.href}
+              to={link.href}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.label}
@@ -80,6 +80,13 @@ export function Header() {
                   <Link to={user?.role === 'student' ? '/dashboard' : '/admin'} className="flex items-center gap-2">
                     <LayoutDashboard className="h-4 w-4" />
                     Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -111,9 +118,9 @@ export function Header() {
           <SheetContent side="right" className="w-72">
             <nav className="flex flex-col gap-4 mt-8">
               {navLinks.map(link => (
-                <Link 
-                  key={link.href} 
-                  to={link.href} 
+                <Link
+                  key={link.href}
+                  to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-lg font-medium py-2"
                 >
@@ -123,15 +130,15 @@ export function Header() {
               <div className="border-t pt-4 mt-2">
                 {isAuthenticated ? (
                   <>
-                    <Link 
-                      to={user?.role === 'student' ? '/dashboard' : '/admin'} 
+                    <Link
+                      to={user?.role === 'student' ? '/dashboard' : '/admin'}
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex items-center gap-2 py-2 text-lg font-medium"
                     >
                       <LayoutDashboard className="h-5 w-5" />
                       Dashboard
                     </Link>
-                    <button 
+                    <button
                       onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                       className="flex items-center gap-2 py-2 text-lg font-medium text-destructive"
                     >
